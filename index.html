@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Múltiplos Embeds</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            color: #333;
+        }
+        #controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        #urlInput {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #loadButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #loadButton:hover {
+            background-color: #0056b3;
+        }
+        #embedContainer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px; /* Espaço entre os embeds */
+            padding-top: 10px;
+        }
+        iframe {
+            width: calc(20% - 12px); /* 5 por linha, ajustando o gap */
+            height: 250px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        /* Estilos para telas menores */
+        @media (max-width: 1200px) {
+            iframe { width: calc(25% - 12px); } /* 4 por linha */
+        }
+        @media (max-width: 992px) {
+            iframe { width: calc(33.33% - 10px); } /* 3 por linha */
+        }
+        @media (max-width: 768px) {
+            iframe { width: calc(50% - 8px); } /* 2 por linha */
+        }
+        @media (max-width: 576px) {
+            iframe { width: 100%; } /* 1 por linha */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Ferramenta de Teste com 10 Embeds</h1>
+    <div id="controls">
+        <input type="text" id="urlInput" placeholder="Cole a URL do seu site aqui" value="https://www.google.com/webhp?igu=1">
+        <button id="loadButton">Carregar e Iniciar Teste</button>
+    </div>
+
+    <div id="embedContainer"></div>
+
+    <script>
+        const urlInput = document.getElementById('urlInput');
+        const loadButton = document.getElementById('loadButton');
+        const container = document.getElementById('embedContainer');
+        const NUM_EMBEDS = 10;
+
+        // Variável para guardar a referência do nosso loop (setInterval)
+        let reloadIntervalId = null;
+
+        loadButton.addEventListener('click', () => {
+            const url = urlInput.value;
+
+            // Validação simples da URL
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                alert('Por favor, insira uma URL válida começando com http:// ou https://');
+                return;
+            }
+
+            // 1. Limpa embeds anteriores e o loop de recarga se já existir
+            container.innerHTML = '';
+            if (reloadIntervalId) {
+                clearInterval(reloadIntervalId);
+            }
+
+            // 2. Cria os 10 iframes (embeds)
+            for (let i = 0; i < NUM_EMBEDS; i++) {
+                const iframe = document.createElement('iframe');
+                iframe.src = url;
+                // Adiciona um título para acessibilidade
+                iframe.title = `Embed de teste ${i + 1}`;
+                container.appendChild(iframe);
+            }
+
+            // 3. Inicia o loop de recarga automática a cada 5 segundos
+            reloadIntervalId = setInterval(() => {
+                const iframes = container.getElementsByTagName('iframe');
+                console.log(`Recarregando ${iframes.length} embeds...`);
+
+                for (const iframe of iframes) {
+                    // A forma mais simples de forçar o recarregamento é redefinir o atributo 'src'
+                    iframe.src = iframe.src;
+                }
+            }, 5000); // 5000 milissegundos = 5 segundos
+        });
+    </script>
+
+</body>
+</html>
