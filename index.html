@@ -17,11 +17,29 @@
         #controls {
             margin-bottom: 20px;
             display: flex;
+            flex-wrap: wrap; /* Permite que os itens quebrem para a próxima linha em telas menores */
             gap: 10px;
             align-items: center;
         }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .input-group label {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 4px;
+        }
         #urlInput {
             flex-grow: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            min-width: 250px; /* Largura mínima para o campo de URL */
+        }
+        .number-input {
+            width: 80px; /* Largura menor para campos numéricos */
             padding: 10px;
             font-size: 16px;
             border: 1px solid #ccc;
@@ -35,6 +53,7 @@
             color: white;
             border: none;
             border-radius: 5px;
+            align-self: flex-end; /* Alinha o botão com a base dos inputs */
         }
         #loadButton:hover {
             background-color: #0056b3;
@@ -69,9 +88,23 @@
 </head>
 <body>
 
-    <h1>Ferramenta de Teste com 10 Embeds</h1>
+    <h1>Ferramenta de Teste com Múltiplos Embeds</h1>
     <div id="controls">
-        <input type="text" id="urlInput" placeholder="Cole a URL do seu site aqui" value="https://www.google.com/webhp?igu=1">
+        <div class="input-group" style="flex-grow: 1;">
+            <label for="urlInput">URL do Site</label>
+            <input type="text" id="urlInput" placeholder="Cole a URL do seu site aqui" value="https://www.google.com/webhp?igu=1">
+        </div>
+
+        <div class="input-group">
+            <label for="numEmbedsInput">Quantidade de Embeds</label>
+            <input type="number" id="numEmbedsInput" class="number-input" value="20" min="1">
+        </div>
+
+        <div class="input-group">
+            <label for="reloadTimeInput">Recarregar a cada (s)</label>
+            <input type="number" id="reloadTimeInput" class="number-input" value="5" min="1">
+        </div>
+
         <button id="loadButton">Carregar e Iniciar Teste</button>
     </div>
 
@@ -81,17 +114,30 @@
         const urlInput = document.getElementById('urlInput');
         const loadButton = document.getElementById('loadButton');
         const container = document.getElementById('embedContainer');
-        const NUM_EMBEDS = 20;
+        const numEmbedsInput = document.getElementById('numEmbedsInput');
+        const reloadTimeInput = document.getElementById('reloadTimeInput');
 
         // Variável para guardar a referência do nosso loop (setInterval)
         let reloadIntervalId = null;
 
         loadButton.addEventListener('click', () => {
             const url = urlInput.value;
+            const numEmbeds = parseInt(numEmbedsInput.value, 10);
+            const reloadTime = parseInt(reloadTimeInput.value, 10) * 1000; // Converte segundos para milissegundos
 
             // Validação simples da URL
             if (!url.startsWith('http://') && !url.startsWith('https://')) {
                 alert('Por favor, insira uma URL válida começando com http:// ou https://');
+                return;
+            }
+
+            // Validação dos números
+            if (isNaN(numEmbeds) || numEmbeds < 1) {
+                alert('Por favor, insira um número válido de embeds.');
+                return;
+            }
+            if (isNaN(reloadTime) || reloadTime < 1000) {
+                alert('Por favor, insira um intervalo de recarga válido (mínimo 1 segundo).');
                 return;
             }
 
@@ -101,8 +147,8 @@
                 clearInterval(reloadIntervalId);
             }
 
-            // 2. Cria os 10 iframes (embeds)
-            for (let i = 0; i < NUM_EMBEDS; i++) {
+            // 2. Cria os iframes (embeds) com base no valor do input
+            for (let i = 0; i < numEmbeds; i++) {
                 const iframe = document.createElement('iframe');
                 iframe.src = url;
                 // Adiciona um título para acessibilidade
@@ -110,7 +156,7 @@
                 container.appendChild(iframe);
             }
 
-            // 3. Inicia o loop de recarga automática a cada 5 segundos
+            // 3. Inicia o loop de recarga automática com o tempo definido
             reloadIntervalId = setInterval(() => {
                 const iframes = container.getElementsByTagName('iframe');
                 console.log(`Recarregando ${iframes.length} embeds...`);
@@ -119,7 +165,7 @@
                     // A forma mais simples de forçar o recarregamento é redefinir o atributo 'src'
                     iframe.src = iframe.src;
                 }
-            }, 5000); // 5000 milissegundos = 5 segundos
+            }, reloadTime);
         });
     </script>
 
